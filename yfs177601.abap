@@ -26,25 +26,21 @@ TYPES:
   END OF t_pos.
 
 DATA:
-  rn     TYPE i,
-  st     TYPE i,
-  rs     TYPE TABLE OF t_mat,
   row    TYPE t_mat,
   _menge TYPE f,
   result TYPE t_gewicht VALUE 0.
 
 PARAMETERS:
-  matnr TYPE t_matnr DEFAULT 'MS1700BABYKPL',
-  stlal LIKE mast-stlal DEFAULT '01',
-  stlan LIKE mast-stlan DEFAULT '1',
-  menge TYPE i DEFAULT 1.
+  matnr TYPE t_matnr OBLIGATORY DEFAULT 'MS1700BABYKPL',
+  stlal LIKE mast-stlal OBLIGATORY DEFAULT '01',
+  stlan LIKE mast-stlan OBLIGATORY DEFAULT '1',
+  menge TYPE i OBLIGATORY DEFAULT 1.
 
 WRITE: /15 'Material', 34 'Beschreibung', 81'Basis-Gewicht', 107'Basis-Menge', 125'Gesamt-Gewicht'.
 PERFORM repeat_character USING '-' 138.
 
 * Convert integer to floating point
 _menge = menge.
-
 PERFORM staufl USING 0 _menge matnr 1 'ST' CHANGING result.
 
 PERFORM repeat_character USING '-' 138.

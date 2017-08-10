@@ -30,24 +30,29 @@ DATA:
   st           TYPE i,
   rs           TYPE TABLE OF t_mat,
   row          TYPE t_mat,
+  _menge       TYPE f,
   total_weight TYPE t_gewicht VALUE 0.
 
 PARAMETERS:
-  matnr  TYPE t_matnr DEFAULT 'MS1700BABYKPL',
-  stlal  LIKE mast-stlal DEFAULT '01',
-  stlan  LIKE mast-stlan DEFAULT '1',
-  faktor TYPE i DEFAULT 1.
+  matnr TYPE t_matnr DEFAULT 'MS1700BABYKPL',
+  stlal LIKE mast-stlal DEFAULT '01',
+  stlan LIKE mast-stlan DEFAULT '1',
+  menge TYPE i DEFAULT 1.
 
-WRITE: /15 'Material', 34 'Beschreibung', 81'Basis-Gewicht', 113'Menge', 125'Gesamt-Gewicht'.
+WRITE: /15 'Material', 34 'Beschreibung', 81'Basis-Gewicht', 107'Basis-Menge', 125'Gesamt-Gewicht'.
 PERFORM repeat_character USING '-' 138.
 
-PERFORM staufl USING 0 matnr 1 'ST'.
+* Convert integer to floating point
+_menge = menge.
+
+PERFORM staufl USING 0 _menge matnr 1 'ST'.
 
 PERFORM repeat_character USING '-' 138.
 WRITE: / 'Gesamtgewicht Rohstoffe:', 120 total_weight, 'G'.
 
 FORM staufl USING
       VALUE(stufe) TYPE i
+      VALUE(faktor) TYPE f
       matnr TYPE t_matnr
       menge LIKE stpo-menge
       meins LIKE stpo-meins.
@@ -97,8 +102,11 @@ FORM staufl USING
 
   IF leaf = 'T'.
     stufe = stufe + 1.
+*    WRITE: / 'Faktor :', faktor, menge.
+    faktor = faktor * menge.
+*    WRITE: / 'Faktor nachher = ', faktor.
     LOOP AT stpos INTO pos.
-      PERFORM staufl USING stufe pos-idnrk pos-menge pos-meins.
+      PERFORM staufl USING stufe faktor pos-idnrk pos-menge pos-meins.
     ENDLOOP.
 *** Stückliste, rekursiv aufrufen
 ***    WRITE: / 'Stückliste!'.

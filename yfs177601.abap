@@ -26,12 +26,12 @@ TYPES:
   END OF t_pos.
 
 DATA:
-  rn           TYPE i,
-  st           TYPE i,
-  rs           TYPE TABLE OF t_mat,
-  row          TYPE t_mat,
-  _menge       TYPE f,
-  total_weight TYPE t_gewicht VALUE 0.
+  rn     TYPE i,
+  st     TYPE i,
+  rs     TYPE TABLE OF t_mat,
+  row    TYPE t_mat,
+  _menge TYPE f,
+  result TYPE t_gewicht VALUE 0.
 
 PARAMETERS:
   matnr TYPE t_matnr DEFAULT 'MS1700BABYKPL',
@@ -45,17 +45,21 @@ PERFORM repeat_character USING '-' 138.
 * Convert integer to floating point
 _menge = menge.
 
-PERFORM staufl USING 0 _menge matnr 1 'ST'.
+PERFORM staufl USING 0 _menge matnr 1 'ST' CHANGING result.
 
 PERFORM repeat_character USING '-' 138.
-WRITE: / 'Gesamtgewicht Rohstoffe:', 120 total_weight, 'G'.
+WRITE: / 'Gesamtgewicht Rohstoffe:', 120 result, 'G'.
 
-FORM staufl USING
+FORM staufl
+  USING
       VALUE(stufe) TYPE i
       VALUE(faktor) TYPE f
       matnr TYPE t_matnr
       menge LIKE stpo-menge
-      meins LIKE stpo-meins.
+      meins LIKE stpo-meins
+  CHANGING
+      result TYPE t_gewicht.
+
   DATA:
     pos            TYPE t_pos,
     stpos          TYPE TABLE OF t_pos,
@@ -106,12 +110,12 @@ FORM staufl USING
     faktor = faktor * menge.
 *    WRITE: / 'Faktor nachher = ', faktor.
     LOOP AT stpos INTO pos.
-      PERFORM staufl USING stufe faktor pos-idnrk pos-menge pos-meins.
+      PERFORM staufl USING stufe faktor pos-idnrk pos-menge pos-meins CHANGING result.
     ENDLOOP.
 *** Stückliste, rekursiv aufrufen
 ***    WRITE: / 'Stückliste!'.
   ELSEIF leaf = 'L'.
-    total_weight = total_weight + total_position.
+    result = result + total_position.
 *** Keine Stückliste, Rekursion abbrechen
 ***    WRITE: / 'Keine Stückliste!'.
   ELSE.
